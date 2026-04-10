@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.env
+.env.local
+.DS_Store
+output_pdfs/
+*.pdf
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
