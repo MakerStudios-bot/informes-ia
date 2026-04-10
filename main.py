@@ -58,8 +58,12 @@ async def webhook_flow(request: Request, background_tasks: BackgroundTasks):
     return JSONResponse({"ok": True})
 
 @app.get("/")
-async def health():
-    return {"status": "ok"}
+async def landing():
+    """Sirve la landing page con formulario de solicitud"""
+    landing_path = Path(__file__).parent / "landing.html"
+    if landing_path.exists():
+        return FileResponse(landing_path)
+    return JSONResponse({"error": "Landing page not found"}, status_code=404)
 
 @app.get("/dashboard")
 async def dashboard():

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informes IA - Reportes Profesionales con Inteligencia Artificial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --bg: #0f1419;
+            --surface: #1a1f2e;
+            --text: #ffffff;
+            --text-muted: #b0b5c0;
+            --border: #2a2f3e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* NAV */
+        nav {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--text);
+        }
+
+        /* HERO */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid var(--border);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 8vw, 56px);
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        /* FEATURES */
+        .features {
+            padding: 80px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .feature {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .feature h3 {
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .feature p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* PRICING */
+        .pricing-section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 60px;
+            font-size: 18px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .pricing-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .pricing-card:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .pricing-card h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .pricing-price {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pricing-currency {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 10px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pricing-features li:before {
+            content: "✓ ";
+            color: var(--primary);
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--surface);
+            margin: 10% auto;
+            padding: 40px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .close {
+            color: var(--text-muted);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: var(--text);
+        }
+
+        .modal h2 {
+            margin-bottom: 24px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .success {
+            color: #51cf66;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--primary);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAV -->
+    <nav>
+        <div class="container">
+            <div class="logo">📊 Informes IA</div>
+            <div>
+                <a href="#pricing">Precios</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">Powered by Claude AI</div>
+            <h1>¿Listo para <em>investigar?</em></h1>
+            <p>Obtén reportes profesionales sobre empresas, mercados y personas en minutos. Análisis completo garantizado.</p>
+            <button class="cta-button" onclick="openForm()">Pedir mi informe →</button>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="container">
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Generación Rápida</h3>
+                <p>Obtén tu informe completo en 2 horas. Sin esperas innecesarias.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <h3>Inteligencia Artificial</h3>
+                <p>Análisis avanzado con Claude IA. Información precisa y fundamentada.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📄</div>
+                <h3>Formato Profesional</h3>
+                <p>Reportes en PDF listos para presentar. Estructura clara y completa.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="pricing-section">
+        <div class="container">
+            <h2 class="section-title">Nuestros Servicios</h2>
+            <p class="section-subtitle">Elige el tipo de informe que necesitas</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Due Diligence Empresa</h3>
+                    <div class="pricing-price">$29.990</div>
+                    <div class="pricing-currency">Pago único</div>
+                    <ul class="pricing-features">
+                        <li>Análisis corporativo completo</li>
+                        <li>Historial financiero</li>
+                        <li>Riesgos identificados</li>
+                        <li>Recomendaciones</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectTipo('due_diligence')">Solicitar</button>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Análisis de Mercado</h3>
+                    <div class="pricing-price">$19.990</div>
+                    <div class="pricing-currency">Pago único</div>
+                    <ul class="pricing-features">
+                        <li>Tendencias del mercado</li>
+                        <li>Competidores principales</li>
+                        <li>Oportunidades</li>
+                        <li>Proyecciones</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectTipo('mercado')">Solicitar</button>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Perfil de Persona</h3>
+                    <div class="pricing-price">$9.990</div>
+                    <div class="pricing-currency">Pago único</div>
+                    <ul class="pricing-features">
+                        <li>Antecedentes públicos</li>
+                        <li>Historial profesional</li>
+                        <li>Presencia digital</li>
+                        <li>Verificación</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectTipo('persona')">Solicitar</button>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Análisis Competencia</h3>
+                    <div class="pricing-price">$24.990</div>
+                    <div class="pricing-currency">Pago único</div>
+                    <ul class="pricing-features">
+                        <li>Estrategias competidoras</li>
+                        <li>Fortalezas y debilidades</li>
+                        <li>Diferenciadores</li>
+                        <li>Benchmarking</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectTipo('competencia')">Solicitar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL FORMULARIO -->
+    <div id="formModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForm()">&times;</span>
+            <h2>Solicitar Informe</h2>
+
+            <form id="requestForm">
+                <div class="form-group">
+                    <label for="tipo">Tipo de Informe *</label>
+                    <select id="tipo" required>
+                        <option value="">Selecciona un tipo</option>
+                        <option value="due_diligence">Due Diligence de Empresa</option>
+                        <option value="mercado">Análisis de Mercado</option>
+                        <option value="persona">Perfil de Persona</option>
+                        <option value="competencia">Análisis de Competencia</option>
+                    </select>
+                    <div class="error" id="tipoError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="objetivo">Empresa, Persona o Tema *</label>
+                    <input type="text" id="objetivo" placeholder="Ej: Apple Inc" required>
+                    <div class="error" id="objetivoError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombre">Tu Nombre *</label>
+                    <input type="text" id="nombre" placeholder="Juan Pérez" required>
+                    <div class="error" id="nombreError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Tu Email *</label>
+                    <input type="email" id="email" placeholder="tu@email.com" required>
+                    <div class="error" id="emailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="datosExtra">Notas adicionales</label>
+                    <textarea id="datosExtra" placeholder="Algún detalle especial que debamos saber..." rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="form-submit" id="submitBtn">Continuar al Pago</button>
+                <div class="loading" id="loading">
+                    <span class="spinner"></span>
+                    Procesando...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Informes IA. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const modal = document.getElementById('formModal');
+        const form = document.getElementById('requestForm');
+        let selectedTipo = null;
+
+        function openForm() {
+            modal.style.display = 'block';
+        }
+
+        function closeForm() {
+            modal.style.display = 'none';
+            form.reset();
+            selectedTipo = null;
+            clearErrors();
+        }
+
+        function selectTipo(tipo) {
+            selectedTipo = tipo;
+            document.getElementById('tipo').value = tipo;
+            modal.style.display = 'block';
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const tipo = document.getElementById('tipo').value;
+            const objetivo = document.getElementById('objetivo').value;
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const datosExtra = document.getElementById('datosExtra').value;
+
+            let hasError = false;
+
+            if (!tipo) {
+                document.getElementById('tipoError').textContent = 'Selecciona un tipo de informe';
+                hasError = true;
+            }
+            if (!objetivo) {
+                document.getElementById('objetivoError').textContent = 'Campo requerido';
+                hasError = true;
+            }
+            if (!nombre) {
+                document.getElementById('nombreError').textContent = 'Campo requerido';
+                hasError = true;
+            }
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Campo requerido';
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        tipo,
+                        objetivo,
+                        email,
+                        nombre,
+                        datos_extra: datosExtra
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.ok) {
+                    alert('✅ Pedido creado. Ahora ve a generar tu link de pago en Flow.cl');
+                    closeForm();
+                } else {
+                    alert('❌ Error: ' + (data.error || 'No se pudo procesar'));
+                }
+            } catch (error) {
+                alert('❌ Error de conexión: ' + error.message);
+            } finally {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) {
+                closeForm();
+            }
+        });
+    </script>
+</body>
+</html>

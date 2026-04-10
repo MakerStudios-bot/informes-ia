@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neurox — Automatización Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #070a14;
+  --surface: #0d1022;
+  --surface2: #111528;
+  --accent: #5b8fff;
+  --accent-cyan: #4fc3f7;
+  --accent-purple: #9b59f5;
+  --grad: linear-gradient(135deg, #4fc3f7, #5b8fff, #9b59f5);
+  --text: #eef0ff;
+  --muted: #6e78a0;
+  --border: rgba(91,143,255,0.15);
+  --border2: rgba(255,255,255,0.06);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(91,143,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91,143,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse, rgba(91,143,255,0.09) 0%, rgba(155,89,245,0.05) 50%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+/* ── NAV ── */
+nav { position: relative; z-index: 10; padding: 28px 0 0; }
+nav .wrap { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+  background: var(--grad); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-tabs {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border2);
+  border-radius: 12px; padding: 4px;
+}
+.nav-tab {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: 8px; cursor: pointer;
+  border: none; background: transparent; color: var(--muted);
+  transition: all 0.2s; letter-spacing: 0.2px;
+}
+.nav-tab.active {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(91,143,255,0.1);
+}
+.nav-tab:hover:not(.active) { color: var(--text); }
+.nav-badge {
+  font-size: 11px; font-weight: 500; color: var(--accent);
+  border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px;
+  background: rgba(91,143,255,0.07); letter-spacing: 0.5px;
+}
+
+/* ── PÁGINAS ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HERO ── */
+.hero { text-align: center; padding: 14px 0 48px; }
+.hero-tag {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  letter-spacing: 2px; text-transform: uppercase;
+  background: var(--grad); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 20px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(32px, 5vw, 52px); line-height: 1.08;
+  letter-spacing: -1.5px; margin-bottom: 16px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+}
+.hero h1 em {
+  font-style: normal;
+  background: var(--grad); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero p {
+  font-size: 16px; color: var(--muted); max-width: 460px;
+  margin: 0 auto; line-height: 1.7; font-weight: 300;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); text-align: center; margin-bottom: 8px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px;
+  letter-spacing: -0.5px; text-align: center; margin-bottom: 32px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+}
+
+/* ── SERVICE BLOCK ── */
+.service-block { margin-bottom: 64px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s; }
+.service-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.service-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.icon-web { background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.25); }
+.icon-bot { background: rgba(91,143,255,0.1); border: 1px solid rgba(91,143,255,0.25); }
+.icon-vid { background: rgba(155,89,245,0.1); border: 1px solid rgba(155,89,245,0.25); }
+.service-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+.service-name.cyan { color: #4fc3f7; }
+.service-name.blue { color: #5b8fff; }
+.service-name.purple { color: #9b59f5; }
+.service-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* ── CARDS ── */
+.cards { display: grid; gap: 14px; }
+.cards-2 { grid-template-columns: repeat(2, 1fr); }
+.cards-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 650px) { .cards-2, .cards-3 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 24px 22px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.card:hover { transform: translateY(-3px); border-color: rgba(91,143,255,0.2); }
+.card.featured-cyan  { border-color: rgba(79,195,247,0.3);  background: linear-gradient(160deg, rgba(79,195,247,0.05)  0%, var(--surface) 60%); }
+.card.featured-blue  { border-color: rgba(91,143,255,0.35); background: linear-gradient(160deg, rgba(91,143,255,0.07)  0%, var(--surface) 60%); }
+.card.featured-purple{ border-color: rgba(155,89,245,0.3);  background: linear-gradient(160deg, rgba(155,89,245,0.06) 0%, var(--surface) 60%); }
+.card.featured-blue::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--grad);
+}
+.card-badge {
+  display: inline-block; font-size: 9px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 20px; margin-bottom: 14px;
+}
+.badge-cyan   { background: rgba(79,195,247,0.1);  color: #4fc3f7; }
+.badge-blue   { background: rgba(91,143,255,0.12); color: #5b8fff; }
+.badge-purple { background: rgba(155,89,245,0.12); color: #b48aff; }
+.badge-popular{ background: linear-gradient(135deg,#4fc3f7,#5b8fff); color: #070a14; }
+.card-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; margin-bottom: 4px; }
+.card-sub  { font-size: 12px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+.price-main {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 36px; letter-spacing: -1px; line-height: 1;
+}
+.price-main.cyan   { color: #4fc3f7; }
+.price-main.blue   { color: #5b8fff; }
+.price-main.purple { color: #9b59f5; }
+.price-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.price-divider { border: none; border-top: 1px solid var(--border2); margin: 16px 0; }
+.price-items { display: flex; flex-direction: column; gap: 8px; }
+.price-item { display: flex; justify-content: space-between; align-items: center; }
+.price-item-name { font-size: 13px; color: var(--muted); }
+.price-item-val  { font-size: 14px; font-weight: 500; }
+
+/* ── CTA STRIP ── */
+.cta-strip {
+  margin: 64px 0 80px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 40px;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.4s;
+}
+@media (max-width: 640px) { .cta-strip { flex-direction: column; align-items: flex-start; } }
+.cta-strip h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.cta-strip p  { font-size: 14px; color: var(--muted); }
+.btn-main {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--grad); color: #070a14;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  padding: 13px 26px; border-radius: 100px; text-decoration: none;
+  white-space: nowrap; transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* ── DEMO SECTION (página principal) ── */
+.demo-section { padding: 0 0 80px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.5s; }
+.demo-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+.demo-tab-btn {
+  padding: 8px 20px; border-radius: 100px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border2); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all 0.2s;
+}
+.demo-tab-btn.active { background: rgba(91,143,255,0.1); border-color: var(--border); color: var(--accent); }
+.demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .demo-grid { grid-template-columns: 1fr; } }
+.demo-chat {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; overflow: hidden;
+}
+.demo-chat-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 12px;
+}
+.demo-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #5b8fff, #9b59f5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.demo-chat-name { font-size: 14px; font-weight: 600; }
+.demo-online { font-size: 11px; color: #4ade80; }
+.demo-chat-body { height: 280px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.demo-msg { max-width: 82%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+.demo-msg.user { align-self: flex-end; background: rgba(91,143,255,0.15); border: 1px solid rgba(91,143,255,0.2); }
+.demo-msg.bot  { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border2); }
+.demo-bot-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.demo-typing { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 16px; display: flex; gap: 4px; }
+.demo-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite; }
+.demo-typing span:nth-child(2) { animation-delay: 0.2s; }
+.demo-typing span:nth-child(3) { animation-delay: 0.4s; }
+.demo-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border2); }
+.demo-input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 8px 12px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+}
+.demo-input::placeholder { color: var(--muted); }
+.demo-send {
+  background: var(--accent); border: none; border-radius: 8px;
+  padding: 8px 14px; color: white; cursor: pointer; font-size: 14px;
+  transition: opacity 0.2s;
+}
+.demo-send:hover { opacity: 0.8; }
+.demo-quick-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
+.demo-quick-btn {
+  font-size: 11px; padding: 5px 10px; border-radius: 20px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); cursor: pointer; transition: all 0.2s;
+}
+.demo-quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+.demo-info { display: flex; flex-direction: column; gap: 14px; }
+.demo-info h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.demo-subtitle { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 4px; }
+.demo-features { display: flex; flex-direction: column; gap: 10px; }
+.demo-feature { display: flex; gap: 12px; align-items: flex-start; }
+.demo-feature-icon {
+  width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(91,143,255,0.1); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.demo-feature-text h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.demo-feature-text p  { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.demo-cta-btn {
+  margin-top: 16px; width: 100%; padding: 13px; border-radius: 12px;
+  background: rgba(91,143,255,0.1); border: 1px solid var(--border);
+  color: var(--accent); font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.demo-cta-btn:hover { background: rgba(91,143,255,0.18); }
+.demo-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 32px; }
+@media (max-width: 600px) { .demo-stats { grid-template-columns: 1fr; } }
+.demo-stat { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 20px; text-align: center; }
+.demo-stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.demo-stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.demo-how { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 32px; margin-bottom: 32px; }
+.demo-how-inner h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 24px; }
+.demo-steps { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+@media (max-width: 600px) { .demo-steps { grid-template-columns: 1fr; } }
+.demo-step { display: flex; gap: 14px; }
+.demo-step-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; flex-shrink: 0; line-height: 1; }
+.demo-step h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.demo-step p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.demo-toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 100;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 18px; font-size: 13px;
+  display: flex; gap: 10px; align-items: center;
+  transform: translateY(80px); opacity: 0; transition: all 0.3s;
+}
+.demo-toast.show { transform: translateY(0); opacity: 1; }
+
+/* ── PÁGINA INFORMES ── */
+.inf-hero { text-align: center; padding: 14px 0 56px; }
+.inf-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
+  color: #a5b4fc; font-size: 11px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 24px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+}
+.inf-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: #6366f1; box-shadow: 0 0 8px #6366f1;
+  animation: pulse 2s infinite;
+}
+.inf-hero h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(32px, 5vw, 52px); line-height: 1.08;
+  letter-spacing: -1.5px; margin-bottom: 16px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+}
+.inf-hero h1 span {
+  background: linear-gradient(135deg, #818cf8, #a78bfa, #22d3ee);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.inf-hero p {
+  font-size: 16px; color: var(--muted); max-width: 480px;
+  margin: 0 auto; line-height: 1.7; font-weight: 300;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s;
+}
+.inf-cards { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 72px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.4s; }
+@media (max-width: 640px) { .inf-cards { grid-template-columns: 1fr; } }
+.inf-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 28px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.inf-card:hover { border-color: rgba(99,102,241,0.35); transform: translateY(-3px); }
+.inf-card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px; font-size: 18px;
+}
+.ic1 { background: rgba(99,102,241,0.15); }
+.ic2 { background: rgba(139,92,246,0.15); }
+.ic3 { background: rgba(6,182,212,0.15); }
+.ic4 { background: rgba(236,72,153,0.15); }
+.inf-card-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.inf-card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+.inf-card-price {
+  font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800;
+  background: linear-gradient(135deg, #818cf8, #22d3ee);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.inf-card-time { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.inf-how { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; margin-bottom: 72px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.5s; }
+@media (max-width: 700px) { .inf-how { grid-template-columns: 1fr; gap: 36px; } }
+.inf-how-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #6366f1; margin-bottom: 12px; }
+.inf-how h3 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 14px; }
+.inf-how p  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+.inf-steps { display: flex; flex-direction: column; gap: 0; }
+.inf-step  { display: flex; gap: 18px; padding-bottom: 28px; }
+.inf-step:last-child { padding-bottom: 0; }
+.inf-step-left { display: flex; flex-direction: column; align-items: center; }
+.inf-step-num {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid rgba(99,102,241,0.4); background: rgba(99,102,241,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #a5b4fc;
+  font-family: 'Syne', sans-serif;
+}
+.inf-step-line { width: 1px; flex: 1; background: linear-gradient(to bottom, rgba(99,102,241,0.3), transparent); margin-top: 6px; }
+.inf-step:last-child .inf-step-line { display: none; }
+.inf-step-body { padding-top: 5px; }
+.inf-step-body h4 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.inf-step-body p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.inf-cta {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 44px;
+  display: flex; align-items: center; justify-content: space-between; gap: 28px;
+  position: relative; overflow: hidden;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.6s;
+}
+@media (max-width: 640px) { .inf-cta { flex-direction: column; align-items: flex-start; padding: 28px; } }
+.inf-cta::before {
+  content: ''; position: absolute; top: -80px; left: -80px;
+  width: 280px; height: 280px;
+  background: radial-gradient(ellipse, rgba(99,102,241,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.inf-cta h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.inf-cta p  { font-size: 13px; color: var(--muted); }
+.btn-inf {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  padding: 13px 26px; border-radius: 100px; text-decoration: none;
+  white-space: nowrap; flex-shrink: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 24px rgba(99,102,241,0.3);
+}
+.btn-inf:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
+.inf-disclaimer { text-align: center; font-size: 11px; color: var(--muted); margin-top: 20px; padding-bottom: 80px; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border2); padding: 28px 0;
+  position: relative; z-index: 1;
+}
+footer .wrap { display: flex; align-items: center; justify-content: center; }
+footer span { font-size: 13px; color: var(--muted); }
+
+/* ── ANIMACIONES ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* ── MODAL INFORMES ── */
+.informe-modal {
+  display: none;
+  position: fixed; z-index: 1000; left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.informe-modal.active {
+  display: flex; align-items: center; justify-content: center;
+}
+
+.informe-modal-content {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.informe-modal-close {
+  position: absolute; right: 20px; top: 20px;
+  color: var(--muted);
+  font-size: 28px; font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.informe-modal-close:hover {
+  color: var(--text);
+}
+
+.informe-modal-content h2 {
+  margin-bottom: 8px;
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 22px;
+}
+
+.informe-modal-subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.informe-form-group {
+  margin-bottom: 20px;
+}
+
+.informe-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.informe-form-group input,
+.informe-form-group select,
+.informe-form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.informe-form-group input:focus,
+.informe-form-group select:focus,
+.informe-form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.informe-form-group input::placeholder,
+.informe-form-group textarea::placeholder {
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="nav-logo">Neurox</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('principal')">Principal</button>
+      <button class="nav-tab" onclick="showPage('informes')">Informes IA</button>
+    </div>
+    <div class="nav-badge">neurox.agency</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     PÁGINA: PRINCIPAL
+═══════════════════════════════════════════ -->
+<div id="page-principal" class="page active">
+  <div class="wrap">
+
+    <div class="hero" style="padding-top:56px">
+      <div class="hero-tag">Automatización · IA · Resultados</div>
+      <h1>Haz crecer tu negocio<br>con <em>Neurox</em></h1>
+      <p>Bots de Instagram, páginas web y videos que trabajan por ti las 24 horas.</p>
+    </div>
+
+    <p class="section-label">Nuestros servicios</p>
+    <h2 class="section-title">Todo lo que necesitas para automatizar</h2>
+
+    <!-- WEB -->
+    <div class="service-block">
+      <div class="service-header">
+        <div class="service-icon icon-web">🌐</div>
+        <div>
+          <div class="service-name cyan">Páginas Web</div>
+          <div class="service-desc">Landing pages y sitios que convierten visitas en clientes</div>
+        </div>
+      </div>
+      <div class="cards cards-2">
+        <div class="card featured-cyan">
+          <div class="card-badge badge-cyan">Landing</div>
+          <div class="card-name">Landing Page</div>
+          <div class="card-sub">Diseño profesional, optimizada para conversión. Lista en 7 días.</div>
+          <div class="price-main cyan">$150.000</div>
+          <div class="price-note">Pago único · CLP</div>
+        </div>
+        <div class="card">
+          <div class="card-badge badge-cyan">Sitio completo</div>
+          <div class="card-name">Sitio Web</div>
+          <div class="card-sub">Múltiples páginas, blog, formularios y dominio incluido.</div>
+          <div class="price-main cyan">$300.000</div>
+          <div class="price-note">Pago único · CLP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOT -->
+    <div class="service-block">
+      <div class="service-header">
+        <div class="service-icon icon-bot">🤖</div>
+        <div>
+          <div class="service-name blue">Bot de Instagram</div>
+          <div class="service-desc">Responde DMs automáticamente con inteligencia artificial</div>
+        </div>
+      </div>
+      <div class="cards cards-3">
+        <div class="card">
+          <div class="card-badge badge-blue">Básico</div>
+          <div class="card-name">Bot Starter</div>
+          <div class="card-sub">Respuestas automáticas a preguntas frecuentes.</div>
+          <div class="price-main blue">$90.000</div>
+          <div class="price-note">Instalación</div>
+          <hr class="price-divider">
+          <div class="price-items">
+            <div class="price-item"><span class="price-item-name">Membresía</span><span class="price-item-val">$24.000/mes</span></div>
+          </div>
+        </div>
+        <div class="card featured-blue">
+          <div class="card-badge badge-popular">⭐ Popular</div>
+          <div class="card-name">Bot Pro</div>
+          <div class="card-sub">IA avanzada que aprende y convierte más clientes.</div>
+          <div class="price-main blue">$140.000</div>
+          <div class="price-note">Instalación</div>
+          <hr class="price-divider">
+          <div class="price-items">
+            <div class="price-item"><span class="price-item-name">Membresía</span><span class="price-item-val">$55.000/mes</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-badge badge-blue">Premium</div>
+          <div class="card-name">Bot Elite</div>
+          <div class="card-sub">Integración total, CRM y analíticas avanzadas.</div>
+          <div class="price-main blue">$190.000</div>
+          <div class="price-note">Instalación</div>
+          <hr class="price-divider">
+          <div class="price-items">
+            <div class="price-item"><span class="price-item-name">Membresía</span><span class="price-item-val">$105.000/mes</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIDEOS -->
+    <div class="service-block">
+      <div class="service-header">
+        <div class="service-icon icon-vid">🎬</div>
+        <div>
+          <div class="service-name purple">Videos para Redes</div>
+          <div class="service-desc">Reels y contenido que genera views y seguidores</div>
+        </div>
+      </div>
+      <div class="cards cards-3">
+        <div class="card">
+          <div class="card-badge badge-purple">Solo</div>
+          <div class="card-name">Video Solo</div>
+          <div class="card-sub">1 Reel profesional editado y listo para publicar.</div>
+          <div class="price-main purple">$35.000</div>
+          <div class="price-note">Por video</div>
+        </div>
+        <div class="card featured-purple">
+          <div class="card-badge badge-popular">⭐ Popular</div>
+          <div class="card-name">Pack x4</div>
+          <div class="card-sub">4 Reels mensuales. Presencia constante en Instagram.</div>
+          <div class="price-main purple">$110.000</div>
+          <div class="price-note">Pack mensual</div>
+        </div>
+        <div class="card">
+          <div class="card-badge badge-purple">Pro</div>
+          <div class="card-name">Pack x8</div>
+          <div class="card-sub">8 Reels mensuales. Estrategia de contenido completa.</div>
+          <div class="price-main purple">$190.000</div>
+          <div class="price-note">Pack mensual</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA CONTACTO -->
+    <div class="cta-strip">
+      <div>
+        <h3>¿Listo para automatizar?</h3>
+        <p>Escríbenos y armamos el plan ideal para tu negocio.</p>
+      </div>
+      <a href="https://wa.me/56965413392?text=Hola%2C%20vi%20los%20precios%20de%20Neurox%20y%20quiero%20cotizar" target="_blank" class="btn-main">
+        Contactar por WhatsApp →
+      </a>
+    </div>
+
+    <!-- DEMO BOT -->
+    <div class="demo-section">
+      <p class="section-label">Demo en vivo</p>
+      <h2 class="section-title">Así responde el bot</h2>
+      <div class="demo-tabs">
+        <button class="demo-tab-btn active" onclick="demoSwitch('maker')">MakerStudios</button>
+        <button class="demo-tab-btn" onclick="demoSwitch('crystal')">CrystalPro</button>
+      </div>
+      <div class="demo-grid">
+        <div class="demo-chat">
+          <div class="demo-chat-header">
+            <div class="demo-avatar" id="dClientAvatar">MS</div>
+            <div>
+              <div class="demo-chat-name" id="dClientName">MakerStudios</div>
+              <div class="demo-online">● En línea</div>
+            </div>
+          </div>
+          <div class="demo-chat-body" id="dChatBody"></div>
+          <div class="demo-quick-row" id="dQuickReplies"></div>
+          <div class="demo-input-row">
+            <input class="demo-input" id="dUserInput" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')demoSend()">
+            <button class="demo-send" onclick="demoSend()">➤</button>
+          </div>
+        </div>
+        <div class="demo-info">
+          <h3>Bot IA para<br><span id="dClientTitle">MakerStudios</span></h3>
+          <p class="demo-subtitle" id="dClientDesc">Agente entrenado con toda la información de la tienda.</p>
+          <div class="demo-features" id="dFeaturesList"></div>
+          <button class="demo-cta-btn" onclick="window.open('https://wa.me/56965413392?text=Hola%2C%20vi%20la%20demo%20y%20quiero%20un%20bot%20as%C3%AD','_blank')">Quiero un bot así para mi negocio →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-stats">
+      <div class="demo-stat"><div class="demo-stat-val">&lt; 3s</div><div class="demo-stat-label">Tiempo de respuesta promedio</div></div>
+      <div class="demo-stat"><div class="demo-stat-val">24/7</div><div class="demo-stat-label">Disponibilidad sin descanso</div></div>
+      <div class="demo-stat"><div class="demo-stat-val">9×</div><div class="demo-stat-label">Más conversiones al responder rápido</div></div>
+    </div>
+
+    <div class="demo-how">
+      <div class="demo-how-inner">
+        <h3>¿Cómo funciona?</h3>
+        <div class="demo-steps">
+          <div class="demo-step"><div class="demo-step-num">01</div><div><h4>Entrenamos al bot</h4><p>Le damos toda la info de tu negocio: servicios, precios, horarios, FAQs.</p></div></div>
+          <div class="demo-step"><div class="demo-step-num">02</div><div><h4>Lo conectamos a tu IG</h4><p>Instalación directa en tu cuenta de Instagram. Sin apps extra.</p></div></div>
+          <div class="demo-step"><div class="demo-step-num">03</div><div><h4>El bot responde</h4><p>Cada DM que llega recibe una respuesta inteligente en segundos.</p></div></div>
+          <div class="demo-step"><div class="demo-step-num">04</div><div><h4>Tú solo cierras ventas</h4><p>El bot filtra y educa. Tú solo hablas con quien ya quiere comprar.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /wrap -->
+</div><!-- /page-principal -->
+
+<!-- ═══════════════════════════════════════════
+     PÁGINA: INFORMES IA
+═══════════════════════════════════════════ -->
+<div id="page-informes" class="page">
+  <div class="wrap">
+
+    <div class="inf-hero" style="padding-top:56px">
+      <div class="inf-badge">Nuevo servicio</div>
+      <h1>Sabe exactamente con<br>quién haces <span>negocios</span></h1>
+      <p>Informes de inteligencia generados con IA a partir de fuentes públicas verificables. Listos en menos de 2 horas.</p>
+    </div>
+
+    <div class="inf-cards">
+      <div class="inf-card">
+        <div class="inf-card-icon ic1">🏢</div>
+        <div class="inf-card-name">Due Diligence de Empresa</div>
+        <div class="inf-card-desc">Reputación, historial legal, socios, noticias y red flags de cualquier empresa chilena.</div>
+        <div class="inf-card-price">$110.000 CLP</div>
+        <div class="inf-card-time">Entrega en ~2 horas</div>
+      </div>
+      <div class="inf-card">
+        <div class="inf-card-icon ic2">📊</div>
+        <div class="inf-card-name">Análisis de Mercado</div>
+        <div class="inf-card-desc">Competidores, precios, tendencias y oportunidades de tu sector antes de invertir.</div>
+        <div class="inf-card-price">$150.000 CLP</div>
+        <div class="inf-card-time">Entrega en ~2 horas</div>
+      </div>
+      <div class="inf-card">
+        <div class="inf-card-icon ic3">🔍</div>
+        <div class="inf-card-name">Investigación de Persona</div>
+        <div class="inf-card-desc">Perfil profesional, empresas asociadas y reputación online de personas públicas.</div>
+        <div class="inf-card-price">$75.000 CLP</div>
+        <div class="inf-card-time">Entrega en ~2 horas</div>
+      </div>
+      <div class="inf-card">
+        <div class="inf-card-icon ic4">⚡</div>
+        <div class="inf-card-name">Inteligencia Competitiva</div>
+        <div class="inf-card-desc">Estrategia, precios, campañas y movimientos recientes de tu competencia directa.</div>
+        <div class="inf-card-price">$120.000 CLP</div>
+        <div class="inf-card-time">Entrega en ~2 horas</div>
+      </div>
+    </div>
+
+    <div class="inf-how">
+      <div>
+        <div class="inf-how-label">¿Cómo funciona?</div>
+        <h3>Tres pasos.<br>Tú no haces nada más.</h3>
+        <p>Nuestra IA investiga decenas de fuentes públicas, cruza la información y redacta un informe estructurado de 15–30 páginas. Sin esperar días. Sin pagar fortunas.</p>
+      </div>
+      <div class="inf-steps">
+        <div class="inf-step">
+          <div class="inf-step-left"><div class="inf-step-num">01</div><div class="inf-step-line"></div></div>
+          <div class="inf-step-body"><h4>Completas el formulario</h4><p>Nos dices qué o a quién quieres investigar. Toma 5 minutos.</p></div>
+        </div>
+        <div class="inf-step">
+          <div class="inf-step-left"><div class="inf-step-num">02</div><div class="inf-step-line"></div></div>
+          <div class="inf-step-body"><h4>Pagas online de forma segura</h4><p>WebPay, tarjeta de crédito o débito. Pago 100% seguro.</p></div>
+        </div>
+        <div class="inf-step">
+          <div class="inf-step-left"><div class="inf-step-num">03</div><div class="inf-step-line"></div></div>
+          <div class="inf-step-body"><h4>Recibes el PDF en tu email</h4><p>En menos de 2 horas tienes el informe completo listo para usar.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="inf-cta">
+      <div>
+        <h3>¿Listo para investigar?</h3>
+        <p>Pide tu informe ahora. Resultado garantizado en 2 horas.</p>
+      </div>
+      <button class="btn-inf" onclick="openInformeForm()">
+        Pedir mi informe →
+      </button>
+    </div>
+    <p class="inf-disclaimer">Generado con inteligencia artificial a partir de fuentes públicas verificables · neurox.agency</p>
+
+  </div><!-- /wrap -->
+</div><!-- /page-informes -->
+
+<!-- ═══════════════════════════════════════════
+     MODAL: FORMULARIO DE INFORMES
+═══════════════════════════════════════════ -->
+<div id="informeModal" class="informe-modal">
+  <div class="informe-modal-content">
+    <span class="informe-modal-close" onclick="closeInformeForm()">&times;</span>
+    <h2>Solicitar Informe</h2>
+    <p class="informe-modal-subtitle">Completa el formulario y nos pondremos en contacto</p>
+
+    <form id="informeForm" onsubmit="handleInformeSubmit(event)">
+      <div class="informe-form-group">
+        <label for="inf_tipo">Tipo de Informe *</label>
+        <select id="inf_tipo" required>
+          <option value="">Selecciona un tipo</option>
+          <option value="due_diligence">Due Diligence de Empresa</option>
+          <option value="mercado">Análisis de Mercado</option>
+          <option value="persona">Investigación de Persona</option>
+          <option value="competencia">Inteligencia Competitiva</option>
+        </select>
+      </div>
+
+      <div class="informe-form-group">
+        <label for="inf_objetivo">Empresa, Persona o Tema *</label>
+        <input type="text" id="inf_objetivo" placeholder="Ej: Apple Inc" required>
+      </div>
+
+      <div class="informe-form-group">
+        <label for="inf_nombre">Tu Nombre *</label>
+        <input type="text" id="inf_nombre" placeholder="Juan Pérez" required>
+      </div>
+
+      <div class="informe-form-group">
+        <label for="inf_email">Tu Email *</label>
+        <input type="email" id="inf_email" placeholder="tu@email.com" required>
+      </div>
+
+      <div class="informe-form-group">
+        <label for="inf_extra">Notas adicionales</label>
+        <textarea id="inf_extra" placeholder="Algún detalle especial..." rows="3"></textarea>
+      </div>
+
+      <button type="submit" class="btn-inf" style="width:100%;">Continuar al Pago</button>
+    </form>
+  </div>
+</div>
+
+<div class="demo-toast" id="dToast"><strong>🤖 Bot en acción</strong> <span id="dToastMsg">Respondiendo...</span></div>
+
+<footer>
+  <div class="wrap">
+    <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700;">Neurox</span>&nbsp;<span>— Automatización inteligente · Santiago, Chile · @neurox.ia</span>
+  </div>
+</footer>
+
+<script>
+/* ── Navegación entre páginas ── */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const idx = id === 'principal' ? 0 : 1;
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+/* ── Demo bot ── */
+const demoClients = {
+  maker: {
+    name:'MakerStudios', avatar:'MS', title:'MakerStudios',
+    desc:'Agente entrenado con toda la información de impresión 3D: materiales, precios, formatos, tiempos de entrega y proceso de pago.',
+    features:[
+      {icon:'🖨️',title:'Cotizaciones automáticas',desc:'Informa precios estimados y tiempos según el tipo de pieza.'},
+      {icon:'📁',title:'Guía de formatos',desc:'Explica qué archivos acepta (STL, OBJ, STEP) y cómo enviarlos.'},
+      {icon:'🧪',title:'Asesoría de materiales',desc:'Recomienda PLA, PETG, TPU o ABS según la necesidad.'},
+      {icon:'🚚',title:'Info de envíos',desc:'Confirma envíos a todo Chile y coordina la logística.'},
+    ],
+    conversations:[
+      {user:'Hola! ¿hacen impresión 3D?',delay:0},
+      {bot:'¡Hola! Sí, somos MakerStudios 🖨️ Hacemos impresión 3D FDM profesional — sin pedido mínimo, envíos a todo Chile.\n\n¿Tienes un archivo listo o necesitas ayuda?',delay:1200},
+      {user:'¿Qué materiales tienen?',delay:3500},
+      {bot:'Trabajamos con:\n\n• **PLA** — ideal para prototipos\n• **PETG** — más resistente\n• **TPU** — flexible\n• **ABS** — alta resistencia al calor\n\n¿Para qué vas a usar la pieza? 🎯',delay:4800},
+      {user:'¿Cuánto cuesta más o menos?',delay:7500},
+      {bot:'Depende del tamaño:\n\n📦 Pequeñas desde $2.000 CLP\n📦 Medianas desde $8.000 CLP\n📦 Grandes desde $20.000 CLP\n\nMándame tu STL y te cotizo exacto ⚡',delay:8800},
+    ],
+    quickReplies:['¿Qué formatos aceptan?','¿Envían a regiones?','Forma de pago'],
+  },
+  crystal: {
+    name:'CrystalPro', avatar:'CP', title:'CrystalPro',
+    desc:'Agente entrenado en limpieza de ventanas profesional: servicios, precios, zonas de cobertura y agendamiento.',
+    features:[
+      {icon:'🪟',title:'Cotización instantánea',desc:'Calcula precio según metros cuadrados y tipo de ventana.'},
+      {icon:'📅',title:'Agenda visitas',desc:'Coordina fecha y hora directamente desde el chat.'},
+      {icon:'📍',title:'Zonas de cobertura',desc:'Informa en qué comunas opera el servicio.'},
+      {icon:'✅',title:'Seguimiento',desc:'Confirma trabajos completados y solicita reseñas.'},
+    ],
+    conversations:[
+      {user:'Hola, necesito limpiar ventanas de mi oficina',delay:0},
+      {bot:'¡Hola! Con gusto te ayudo 🪟 En CrystalPro hacemos limpieza profesional de ventanas para oficinas y edificios en Santiago.\n\n¿Cuántos pisos tiene el edificio y en qué comuna están?',delay:1200},
+      {user:'3 pisos, en Providencia',delay:3500},
+      {bot:'Perfecto, cubrimos Providencia 📍\n\nPara 3 pisos el precio aproximado es:\n\n• Interior + exterior: desde $85.000\n• Solo exterior: desde $55.000\n\n¿Quieres agendar una visita de evaluación gratuita? 📅',delay:4800},
+    ],
+    quickReplies:['¿Qué comunas cubren?','Ver precios','Agendar visita'],
+  }
+};
+
+let dCurrentClient = 'maker';
+
+function demoSwitch(key) {
+  document.querySelectorAll('.demo-tab-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', (key==='maker'&&i===0)||(key==='crystal'&&i===1));
+  });
+  dCurrentClient = key;
+  const c = demoClients[key];
+  document.getElementById('dClientAvatar').textContent = c.avatar;
+  document.getElementById('dClientName').textContent   = c.name;
+  document.getElementById('dClientTitle').textContent  = c.title;
+  document.getElementById('dClientDesc').textContent   = c.desc;
+  document.getElementById('dFeaturesList').innerHTML   = c.features.map(f =>
+    `<div class="demo-feature"><span class="demo-feature-icon">${f.icon}</span><div class="demo-feature-text"><h4>${f.title}</h4><p>${f.desc}</p></div></div>`
+  ).join('');
+  document.getElementById('dQuickReplies').innerHTML = c.quickReplies.map(r =>
+    `<button class="demo-quick-btn" onclick="demoQuick('${r}')">${r}</button>`
+  ).join('');
+  const cb = document.getElementById('dChatBody');
+  cb.innerHTML = '';
+  c.conversations.forEach(msg => {
+    setTimeout(() => {
+      if (msg.user) demoAddUser(msg.user);
+      if (msg.bot)  demoAddBot(msg.bot);
+    }, msg.delay);
+  });
+}
+
+function demoAddUser(text) {
+  const cb = document.getElementById('dChatBody');
+  const div = document.createElement('div');
+  div.className = 'demo-msg user'; div.textContent = text;
+  cb.appendChild(div); cb.scrollTop = cb.scrollHeight;
+}
+function demoAddBot(text) {
+  const cb = document.getElementById('dChatBody');
+  const typing = document.createElement('div');
+  typing.className = 'demo-typing'; typing.id = 'dTyping';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  cb.appendChild(typing); cb.scrollTop = cb.scrollHeight;
+  setTimeout(() => {
+    const t = document.getElementById('dTyping'); if(t) t.remove();
+    const div = document.createElement('div'); div.className = 'demo-msg bot';
+    const label = document.createElement('div'); label.className = 'demo-bot-label';
+    label.textContent = 'Bot IA · ' + demoClients[dCurrentClient].name;
+    div.appendChild(label);
+    const content = document.createElement('div');
+    content.innerHTML = text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    div.appendChild(content);
+    cb.appendChild(div); cb.scrollTop = cb.scrollHeight;
+    dShowToast('Bot respondió en menos de 3 segundos');
+  }, 1200);
+}
+const dResponses = {
+  'precio':'El precio depende del tamaño. Mándame los detalles y te cotizo en 24 hrs ⚡',
+  'hola':'¡Hola! ¿En qué te puedo ayudar hoy? 😊',
+  'hora':'¡Claro! Tenemos disponibilidad de lunes a sábado. ¿Qué día? 📅',
+  'envio':'Sí, hacemos envíos a todo Chile 🚚',
+  'pago':'Se requiere un anticipo del 50% para comenzar 💳',
+  'formato':'Aceptamos .STL, .OBJ y .STEP 📁',
+  'material':'Trabajamos con PLA, PETG, TPU y ABS 🎯',
+  'comuna':'Cubrimos Las Condes, Providencia, Vitacura, Ñuñoa, Santiago Centro y más 📍',
+};
+function demoSend() {
+  const input = document.getElementById('dUserInput');
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; demoAddUser(text);
+  const lower = text.toLowerCase();
+  let resp = '¡Gracias por tu mensaje! Te respondo de inmediato 😊';
+  for (const [k,v] of Object.entries(dResponses)) { if (lower.includes(k)) { resp = v; break; } }
+  setTimeout(() => demoAddBot(resp), 500);
+}
+function demoQuick(text) {
+  demoAddUser(text);
+  const lower = text.toLowerCase();
+  let resp = '¡Gracias por tu consulta! 😊';
+  for (const [k,v] of Object.entries(dResponses)) { if (lower.includes(k)) { resp = v; break; } }
+  setTimeout(() => demoAddBot(resp), 500);
+}
+function dShowToast(msg) {
+  const t = document.getElementById('dToast');
+  document.getElementById('dToastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── Funciones Modal Informes ── */
+function openInformeForm() {
+  document.getElementById('informeModal').classList.add('active');
+}
+
+function closeInformeForm() {
+  document.getElementById('informeModal').classList.remove('active');
+  document.getElementById('informeForm').reset();
+}
+
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('informeModal');
+  if (e.target == modal) {
+    closeInformeForm();
+  }
+});
+
+async function handleInformeSubmit(e) {
+  e.preventDefault();
+
+  const tipo = document.getElementById('inf_tipo').value;
+  const objetivo = document.getElementById('inf_objetivo').value;
+  const nombre = document.getElementById('inf_nombre').value;
+  const email = document.getElementById('inf_email').value;
+  const datosExtra = document.getElementById('inf_extra').value;
+
+  try {
+    const response = await fetch('/api/pedidos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        tipo,
+        objetivo,
+        email,
+        nombre,
+        datos_extra: datosExtra
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.ok) {
+      alert('✅ Pedido creado. Te enviaremos un link de pago al email.');
+      closeInformeForm();
+    } else {
+      alert('❌ Error: ' + (data.error || 'No se pudo procesar'));
+    }
+  } catch (error) {
+    alert('❌ Error de conexión: ' + error.message);
+  }
+}
+
+demoSwitch('maker');
+</script>
+</body>
+</html>
