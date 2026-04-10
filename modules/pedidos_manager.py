@@ -4,7 +4,7 @@ Gestor de pedidos - almacenamiento persistente
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import dict, list, Optional
+from typing import Optional
 
 PEDIDOS_FILE = Path(__file__).parent.parent / "pedidos.json"
 
