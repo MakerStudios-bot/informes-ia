@@ -1003,7 +1003,7 @@ window.addEventListener('click', (e) => {
   }
 });
 
-function handleInformeSubmit(e) {
+async function handleInformeSubmit(e) {
   e.preventDefault();
 
   const tipoSelect = document.getElementById('inf_tipo');
@@ -1014,22 +1014,45 @@ function handleInformeSubmit(e) {
   const email = document.getElementById('inf_email').value;
   const notas = document.getElementById('inf_extra').value;
 
-  // Construir mensaje de WhatsApp
-  let mensaje = `Hola Neurox! Quiero solicitar un informe.\nTipo: ${tipoLabel}\nSobre: ${objetivo}\nNombre: ${nombre}\nEmail: ${email}`;
+  try {
+    // 1. Crear pedido en el dashboard
+    const response = await fetch('/api/pedidos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        tipo: tipoValue,
+        objetivo: objetivo,
+        email: email,
+        nombre: nombre,
+        datos_extra: notas
+      })
+    });
 
-  if (notas.trim()) {
-    mensaje += `\nNotas: ${notas}`;
+    if (!response.ok) {
+      alert('❌ Error al crear el pedido. Intenta de nuevo.');
+      return;
+    }
+
+    // 2. Si se creó exitosamente, construir mensaje de WhatsApp
+    let mensaje = `Hola Neurox! Quiero solicitar un informe.\nTipo: ${tipoLabel}\nSobre: ${objetivo}\nNombre: ${nombre}\nEmail: ${email}`;
+
+    if (notas.trim()) {
+      mensaje += `\nNotas: ${notas}`;
+    }
+
+    // 3. Abrir WhatsApp con el mensaje
+    const mensajeCodificado = encodeURIComponent(mensaje);
+    const whatsappUrl = `https://wa.me/56965413392?text=${mensajeCodificado}`;
+    window.open(whatsappUrl, '_blank');
+
+    // 4. Mostrar confirmación y cerrar modal
+    alert('✅ Pedido creado. Se abrirá WhatsApp para confirmar.');
+    closeInformeForm();
+  } catch (error) {
+    alert('❌ Error de conexión: ' + error.message);
   }
-
-  // Codificar mensaje para URL
-  const mensajeCodificado = encodeURIComponent(mensaje);
-
-  // Abrir WhatsApp con el mensaje
-  const whatsappUrl = `https://wa.me/56965413392?text=${mensajeCodificado}`;
-  window.open(whatsappUrl, '_blank');
-
-  // Cerrar el modal
-  closeInformeForm();
 }
 
 demoSwitch('maker');
