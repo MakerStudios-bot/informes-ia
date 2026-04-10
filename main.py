@@ -5,6 +5,7 @@ import os, hmac, hashlib
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+import glob
 from pathlib import Path
 from dotenv import load_dotenv
 from pipeline import run_pipeline
@@ -47,6 +48,7 @@ async def webhook_flow(request: Request, background_tasks: BackgroundTasks):
         "objetivo": pedido_guardado["objetivo"],
         "datos_extra": pedido_guardado["datos_extra"],
         "flow_order": data.get("flowOrder"),
+        "instagram_sender_id": pedido_guardado.get("instagram_sender_id"),
     }
 
     # Generar informe en background
@@ -66,6 +68,18 @@ async def dashboard():
     if dashboard_path.exists():
         return FileResponse(dashboard_path)
     return JSONResponse({"error": "Dashboard not found"}, status_code=404)
+
+@app.get("/pdf/{filename}")
+async def get_pdf(filename: str):
+    """Sirve un PDF generado públicamente"""
+    # Sanitizar nombre para evitar path traversal
+    if ".." in filename or filename.startswith("/"):
+        return JSONResponse({"error": "Invalid filename"}, status_code=400)
+
+    pdf_path = Path(__file__).parent / "output_pdfs" / filename
+    if pdf_path.exists():
+        return FileResponse(pdf_path, media_type="application/pdf")
+    return JSONResponse({"error": "PDF not found"}, status_code=404)
 
 @app.post("/api/pedidos")
 async def crear_pedido_api(

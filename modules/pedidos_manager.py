@@ -10,6 +10,11 @@ PEDIDOS_FILE = Path(__file__).parent.parent / "pedidos.json"
 
 def crear_pedido(tipo: str, objetivo: str, email: str, nombre: str, datos_extra: str = "") -> dict:
     """Crea un nuevo pedido y lo guarda"""
+    # Extraer instagram_sender_id de datos_extra si viene en formato "instagram_sender_id:123"
+    instagram_sender_id = None
+    if datos_extra and "instagram_sender_id:" in datos_extra:
+        instagram_sender_id = datos_extra.split("instagram_sender_id:")[-1]
+
     pedido = {
         "id": int(datetime.now().timestamp() * 1000),
         "tipo": tipo,
@@ -20,7 +25,8 @@ def crear_pedido(tipo: str, objetivo: str, email: str, nombre: str, datos_extra:
         "estado": "pendiente",
         "fecha_creacion": datetime.now().isoformat(),
         "fecha_pago": None,
-        "link_flow": None
+        "link_flow": None,
+        "instagram_sender_id": instagram_sender_id
     }
 
     pedidos = leer_pedidos()

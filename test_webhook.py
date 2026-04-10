@@ -9,7 +9,7 @@ from datetime import datetime
 async def test_full_flow():
     """Prueba el flujo completo: crear pedido → simular pago → generar informe"""
 
-    SERVER_URL = "http://localhost:8000"
+    SERVER_URL = "http://127.0.0.1:8000"
 
     print("=" * 60)
     print("🧪 PRUEBA DEL FLUJO COMPLETO DE INFORMES-IA")
@@ -25,7 +25,7 @@ async def test_full_flow():
         "datos_extra": "Prueba desde script"
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(
             f"{SERVER_URL}/api/pedidos",
             params=pedido_data
@@ -49,7 +49,7 @@ async def test_full_flow():
         "amount": 29990
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         response = await client.post(
             f"{SERVER_URL}/webhook/flow",
             json=webhook_data
@@ -63,12 +63,12 @@ async def test_full_flow():
     print(f"   Flow está procesando en background...")
 
     # 3. Esperar a que se genere
-    print(f"\n3️⃣  Esperando generación del informe (5 segundos)...")
-    await asyncio.sleep(5)
+    print(f"\n3️⃣  Esperando generación del informe (15 segundos)...")
+    await asyncio.sleep(15)
 
     # 4. Verificar estado
     print(f"\n4️⃣  Verificando estado del pedido...")
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         response = await client.get(f"{SERVER_URL}/api/pedidos")
 
     if response.status_code == 200:

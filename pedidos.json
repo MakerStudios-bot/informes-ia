@@ -1,1 +1,28 @@
-{"pedidos": []}
+{
+  "pedidos": [
+    {
+      "id": 1775848433648,
+      "tipo": "due_diligence",
+      "objetivo": "Empresa Test SPA",
+      "email": "test@example.com",
+      "nombre": "Cliente Test",
+      "datos_extra": "Prueba desde script",
+      "estado": "pagado",
+      "fecha_creacion": "2026-04-10T15:13:53.648782",
+      "fecha_pago": "2026-04-10T15:13:53.653425",
+      "link_flow": null
+    },
+    {
+      "id": 1775848551588,
+      "tipo": "due_diligence",
+      "objetivo": "Empresa Test SPA",
+      "email": "test@example.com",
+      "nombre": "Cliente Test",
+      "datos_extra": "Prueba desde script",
+      "estado": "pagado",
+      "fecha_creacion": "2026-04-10T15:15:51.588702",
+      "fecha_pago": "2026-04-10T15:15:51.592829",
+      "link_flow": null
+    }
+  ]
+}
