@@ -97,26 +97,21 @@ async def crear_pedido_api(
 ):
     """API para crear un pedido desde el dashboard"""
     try:
-        print(f"📝 Creando pedido: {nombre} ({email})")
+        print("Creando pedido:", nombre, email)
         pedido = crear_pedido(tipo, objetivo, email, nombre, datos_extra)
-        print(f"✅ Pedido creado: {pedido.get('id')}")
+        print("Pedido creado:", pedido.get('id'))
 
         # Enviar notificación al dueño
-        try:
-            if background_tasks:
-                print(f"📧 Notificando al dueño...")
-                background_tasks.add_task(notify_new_order, email, nombre, tipo, objetivo, datos_extra)
-            else:
-                print(f"⚠️  No hay background_tasks disponible")
-        except Exception as e:
-            print(f"⚠️  Error enviando notificación: {e}")
+        if background_tasks:
+            print("Notificando al dueño...")
+            background_tasks.add_task(notify_new_order, email, nombre, tipo, objetivo, datos_extra)
 
         return JSONResponse({
             "ok": True,
             "pedido": pedido
         })
     except Exception as e:
-        print(f"❌ Error creando pedido: {e}")
+        print("Error creando pedido:", str(e))
         import traceback
         traceback.print_exc()
         return JSONResponse({"error": str(e)}, status_code=400)
