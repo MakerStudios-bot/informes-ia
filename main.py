@@ -3,7 +3,9 @@ Informes IA — Servidor principal
 """
 import os, hmac, hashlib
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from dotenv import load_dotenv
 from pipeline import run_pipeline
 
@@ -31,6 +33,14 @@ async def webhook_flow(request: Request, background_tasks: BackgroundTasks):
 @app.get("/")
 async def health():
     return {"status": "ok"}
+
+@app.get("/dashboard")
+async def dashboard():
+    """Sirve el dashboard HTML"""
+    dashboard_path = Path(__file__).parent / "dashboard.html"
+    if dashboard_path.exists():
+        return FileResponse(dashboard_path)
+    return JSONResponse({"error": "Dashboard not found"}, status_code=404)
 
 if __name__ == "__main__":
     import uvicorn
