@@ -352,24 +352,57 @@
                     <button type="submit">Generar Link de Pago</button>
                 </form>
 
-                <div id="link-generado" style="display: none; margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 4px;">
-                    <p style="font-weight: 600; margin-bottom: 10px;">✅ Link Generado:</p>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" id="link-url" readonly style="flex: 1; padding: 10px; background: white; border: 1px solid #ccc;">
-                        <button type="button" onclick="copiarLink()" class="copy-btn">Copiar</button>
+                <div id="pedido-creado" style="display: none; margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 4px;">
+                    <p style="font-weight: 600; margin-bottom: 10px;">✅ Pedido Registrado</p>
+                    <p style="font-size: 14px; color: #333; margin-bottom: 15px;">El pedido ha sido creado en el sistema. Ahora debes:</p>
+                    <ol style="margin-left: 20px; color: #333; line-height: 1.8;">
+                        <li>Ir a <strong>Flow.com → Link de pago</strong></li>
+                        <li>Generar un nuevo link con estos datos:
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li><strong>Monto:</strong> <span id="pedido-monto">$0</span></li>
+                                <li><strong>Descripción:</strong> <span id="pedido-desc">Informe</span></li>
+                                <li><strong>Email:</strong> <span id="pedido-email">cliente@example.com</span></li>
+                            </ul>
+                        </li>
+                        <li>Copiar el link de Flow</li>
+                        <li>Pegar aquí abajo:</li>
+                    </ol>
+
+                    <div style="margin-top: 15px;">
+                        <label style="font-weight: 500; display: block; margin-bottom: 5px;">URL del Link de Flow.com:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="link-flow" placeholder="https://flow.cl/..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button type="button" onclick="guardarLink()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Guardar Link</button>
+                        </div>
                     </div>
-                    <p style="font-size: 12px; color: #666; margin-top: 10px;">Comparte este link con el cliente para que realice el pago</p>
                 </div>
 
                 <div style="margin-top: 30px; padding: 20px; background: #f3f4f6; border-radius: 4px;">
-                    <h4 style="margin-bottom: 10px;">📝 Instrucciones:</h4>
+                    <h4 style="margin-bottom: 10px;">📝 Flujo Completo:</h4>
                     <ol style="margin-left: 20px; line-height: 1.8; color: #666;">
-                        <li>Selecciona el tipo de informe que necesita</li>
-                        <li>Ingresa la empresa o persona a investigar</li>
-                        <li>Completa datos del cliente</li>
-                        <li>Haz clic en "Generar Link"</li>
-                        <li>Comparte el link con el cliente por WhatsApp, email, etc.</li>
-                        <li>Cuando pague, el informe se genera automáticamente</li>
+                        <li><strong>Aquí en el dashboard:</strong>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Selecciona el tipo de informe</li>
+                                <li>Ingresa empresa/persona a investigar</li>
+                                <li>Completa datos del cliente</li>
+                                <li>Haz clic en "Generar Link"</li>
+                            </ul>
+                        </li>
+                        <li><strong>En Flow.com:</strong>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Abre <a href="https://dashboard.flow.cl" target="_blank" style="color: #667eea; text-decoration: underline;">Flow.com</a> → Link de pago</li>
+                                <li>Crea un nuevo link con el monto y descripción que te muestra</li>
+                                <li>Copia el link de Flow</li>
+                            </ul>
+                        </li>
+                        <li><strong>Vuelve aquí:</strong>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Pega el link de Flow en el campo</li>
+                                <li>Haz clic en "Guardar Link"</li>
+                            </ul>
+                        </li>
+                        <li><strong>Comparte con cliente:</strong> Envía el link por WhatsApp, email, etc.</li>
+                        <li><strong>Automático:</strong> Cuando pague → informe generado → email enviado</li>
                     </ol>
                 </div>
             </div>
@@ -387,9 +420,9 @@
                             <th>Tipo</th>
                             <th>Objetivo</th>
                             <th>Monto</th>
+                            <th>Link Flow</th>
                             <th>Estado</th>
                             <th>Fecha Creación</th>
-                            <th>Fecha Pago</th>
                         </tr>
                     </thead>
                     <tbody id="historial-table">
@@ -439,7 +472,7 @@
             if (tabName === 'historial') actualizarHistorial();
         }
 
-        // Crear link de pago
+        // Crear pedido
         function crearLink(e) {
             e.preventDefault();
 
@@ -449,7 +482,7 @@
             const email = document.getElementById('email').value;
             const datos_extra = document.getElementById('datos_extra').value;
 
-            // Guardar en localStorage (simulado)
+            // Crear pedido
             const pedido = {
                 id: Date.now(),
                 tipo,
@@ -460,35 +493,65 @@
                 monto: PRECIOS[tipo],
                 estado: 'pendiente',
                 fecha_creacion: new Date().toLocaleString('es-CL'),
-                fecha_pago: null
+                fecha_pago: null,
+                link_flow: null
             };
 
+            // Guardar en localStorage
             let pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
             pedidos.push(pedido);
             localStorage.setItem('pedidos', JSON.stringify(pedidos));
 
-            // Mostrar éxito
-            document.getElementById('success-msg').textContent = '✅ Link creado exitosamente. Comparte el enlace con el cliente.';
+            // Guardar ID temporal para usar en guardarLink
+            window.pedidoActual = pedido;
+
+            // Mostrar instrucciones
+            document.getElementById('success-msg').textContent = '✅ Pedido creado. Ahora sigue los pasos para generar el link en Flow.com';
             document.getElementById('success-msg').style.display = 'block';
 
-            // Generar link simulado (en prod sería de Flow)
-            const linkUrl = `https://flow.cl/pay/${pedido.id}?amount=${pedido.monto}&description=${encodeURIComponent(objetivo)}`;
-            document.getElementById('link-url').value = linkUrl;
-            document.getElementById('link-generado').style.display = 'block';
+            // Mostrar datos del pedido
+            document.getElementById('pedido-monto').textContent = `$${pedido.monto.toLocaleString('es-CL')}`;
+            document.getElementById('pedido-desc').textContent = `Informe ${TIPOS_LABEL[tipo]} - ${objetivo}`;
+            document.getElementById('pedido-email').textContent = email;
+            document.getElementById('pedido-creado').style.display = 'block';
+            document.getElementById('link-flow').value = '';
+            document.getElementById('link-flow').focus();
 
             // Limpiar formulario
             setTimeout(() => {
                 document.querySelector('form').reset();
-                document.getElementById('success-msg').style.display = 'none';
-            }, 3000);
+            }, 500);
         }
 
-        // Copiar link
-        function copiarLink() {
-            const linkUrl = document.getElementById('link-url');
-            linkUrl.select();
-            document.execCommand('copy');
-            alert('✅ Link copiado al portapapeles');
+        // Guardar link de Flow
+        function guardarLink() {
+            const linkFlow = document.getElementById('link-flow').value.trim();
+
+            if (!linkFlow) {
+                alert('Por favor ingresa el link de Flow.com');
+                return;
+            }
+
+            if (!linkFlow.includes('flow.cl')) {
+                alert('El link debe ser de Flow.com');
+                return;
+            }
+
+            // Actualizar pedido con el link
+            if (window.pedidoActual) {
+                window.pedidoActual.link_flow = linkFlow;
+
+                let pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+                const index = pedidos.findIndex(p => p.id === window.pedidoActual.id);
+                if (index !== -1) {
+                    pedidos[index].link_flow = linkFlow;
+                    localStorage.setItem('pedidos', JSON.stringify(pedidos));
+                }
+            }
+
+            alert('✅ Link guardado. Ahora comparte este link con el cliente:\n\n' + linkFlow);
+            document.getElementById('pedido-creado').style.display = 'none';
+            document.getElementById('success-msg').style.display = 'none';
         }
 
         // Actualizar dashboard
@@ -541,9 +604,14 @@
                         <td>${TIPOS_LABEL[p.tipo]}</td>
                         <td>${p.objetivo}</td>
                         <td>$${p.monto.toLocaleString('es-CL')}</td>
+                        <td>
+                            ${p.link_flow ?
+                                `<a href="${p.link_flow}" target="_blank" style="color: #667eea; text-decoration: underline; font-size: 12px;">Abrir link</a>`
+                                : '<span style="color: #999;">Sin link</span>'
+                            }
+                        </td>
                         <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
                         <td>${p.fecha_creacion}</td>
-                        <td>${p.fecha_pago || '-'}</td>
                     </tr>
                 `).join('');
             }
