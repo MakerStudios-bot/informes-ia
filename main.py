@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from pipeline import run_pipeline
+from modules.flow_integration import crear_link_pago, validar_webhook
 
 load_dotenv()
 app = FastAPI(title="Informes IA", version="1.0.0")
@@ -31,6 +32,36 @@ async def webhook_flow(request: Request, background_tasks: BackgroundTasks):
 @app.get("/")
 async def health():
     return {"status": "ok"}
+
+@app.post("/crear-link-pago")
+async def crear_link_endpoint(
+    tipo: str,
+    objetivo: str,
+    email: str,
+    nombre: str
+):
+    """
+    Crea un link de pago en Flow automáticamente.
+
+    Parámetros:
+    - tipo: due_diligence, mercado, persona, competencia
+    - objetivo: Empresa o persona a investigar
+    - email: Email del cliente
+    - nombre: Nombre del cliente
+    """
+    try:
+        link = crear_link_pago(tipo, objetivo, email, nombre)
+        return {
+            "status": "ok",
+            "link": link,
+            "tipo": tipo,
+            "objetivo": objetivo
+        }
+    except Exception as e:
+        return JSONResponse(
+            {"error": str(e)},
+            status_code=400
+        )
 
 if __name__ == "__main__":
     import uvicorn
