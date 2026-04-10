@@ -473,7 +473,7 @@
         }
 
         // Crear pedido
-        function crearLink(e) {
+        async function crearLink(e) {
             e.preventDefault();
 
             const tipo = document.getElementById('tipo').value;
@@ -482,49 +482,46 @@
             const email = document.getElementById('email').value;
             const datos_extra = document.getElementById('datos_extra').value;
 
-            // Crear pedido
-            const pedido = {
-                id: Date.now(),
-                tipo,
-                objetivo,
-                nombre,
-                email,
-                datos_extra,
-                monto: PRECIOS[tipo],
-                estado: 'pendiente',
-                fecha_creacion: new Date().toLocaleString('es-CL'),
-                fecha_pago: null,
-                link_flow: null
-            };
+            try {
+                // Crear pedido en el servidor
+                const response = await fetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tipo, objetivo, nombre, email, datos_extra })
+                });
 
-            // Guardar en localStorage
-            let pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-            pedidos.push(pedido);
-            localStorage.setItem('pedidos', JSON.stringify(pedidos));
+                if (!response.ok) throw new Error('Error creando pedido');
 
-            // Guardar ID temporal para usar en guardarLink
-            window.pedidoActual = pedido;
+                const result = await response.json();
+                const pedido = result.pedido;
 
-            // Mostrar instrucciones
-            document.getElementById('success-msg').textContent = '✅ Pedido creado. Ahora sigue los pasos para generar el link en Flow.com';
-            document.getElementById('success-msg').style.display = 'block';
+                // Guardar ID temporal para usar en guardarLink
+                window.pedidoActual = pedido;
 
-            // Mostrar datos del pedido
-            document.getElementById('pedido-monto').textContent = `$${pedido.monto.toLocaleString('es-CL')}`;
-            document.getElementById('pedido-desc').textContent = `Informe ${TIPOS_LABEL[tipo]} - ${objetivo}`;
-            document.getElementById('pedido-email').textContent = email;
-            document.getElementById('pedido-creado').style.display = 'block';
-            document.getElementById('link-flow').value = '';
-            document.getElementById('link-flow').focus();
+                // Mostrar instrucciones
+                document.getElementById('success-msg').textContent = '✅ Pedido creado. Ahora sigue los pasos para generar el link en Flow.com';
+                document.getElementById('success-msg').style.display = 'block';
 
-            // Limpiar formulario
-            setTimeout(() => {
-                document.querySelector('form').reset();
-            }, 500);
+                // Mostrar datos del pedido
+                document.getElementById('pedido-monto').textContent = `$${PRECIOS[tipo].toLocaleString('es-CL')}`;
+                document.getElementById('pedido-desc').textContent = `Informe ${TIPOS_LABEL[tipo]} - ${objetivo}`;
+                document.getElementById('pedido-email').textContent = email;
+                document.getElementById('pedido-creado').style.display = 'block';
+                document.getElementById('link-flow').value = '';
+                document.getElementById('link-flow').focus();
+
+                // Limpiar formulario
+                setTimeout(() => {
+                    document.querySelector('form').reset();
+                }, 500);
+            } catch (err) {
+                document.getElementById('error-msg').textContent = '❌ Error creando pedido: ' + err.message;
+                document.getElementById('error-msg').style.display = 'block';
+            }
         }
 
         // Guardar link de Flow
-        function guardarLink() {
+        async function guardarLink() {
             const linkFlow = document.getElementById('link-flow').value.trim();
 
             if (!linkFlow) {
@@ -537,89 +534,117 @@
                 return;
             }
 
-            // Actualizar pedido con el link
-            if (window.pedidoActual) {
-                window.pedidoActual.link_flow = linkFlow;
-
-                let pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-                const index = pedidos.findIndex(p => p.id === window.pedidoActual.id);
-                if (index !== -1) {
-                    pedidos[index].link_flow = linkFlow;
-                    localStorage.setItem('pedidos', JSON.stringify(pedidos));
-                }
+            if (!window.pedidoActual) {
+                alert('Error: pedido no encontrado');
+                return;
             }
 
-            alert('✅ Link guardado. Ahora comparte este link con el cliente:\n\n' + linkFlow);
-            document.getElementById('pedido-creado').style.display = 'none';
-            document.getElementById('success-msg').style.display = 'none';
+            try {
+                // Actualizar link en el servidor
+                const response = await fetch(`/api/pedidos/${window.pedidoActual.email}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ link_flow: linkFlow })
+                });
+
+                if (!response.ok) throw new Error('Error guardando link');
+
+                alert('✅ Link guardado. Ahora comparte este link con el cliente:\n\n' + linkFlow);
+                document.getElementById('pedido-creado').style.display = 'none';
+                document.getElementById('success-msg').style.display = 'none';
+            } catch (err) {
+                alert('❌ Error guardando link: ' + err.message);
+            }
         }
 
         // Actualizar dashboard
-        function actualizarDashboard() {
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
+        async function actualizarDashboard() {
+            try {
+                const response = await fetch('/api/pedidos');
+                if (!response.ok) throw new Error('Error obteniendo pedidos');
 
-            const totalPedidos = pedidos.length;
-            const pagosCompletados = pedidos.filter(p => p.estado === 'pagado').length;
-            const informesGenerados = pedidos.filter(p => p.estado === 'completado').length;
-            const ingresos = pedidos
-                .filter(p => p.estado === 'pagado')
-                .reduce((sum, p) => sum + p.monto, 0);
+                const result = await response.json();
+                const pedidos = result.pedidos || [];
 
-            document.getElementById('total-pedidos').textContent = totalPedidos;
-            document.getElementById('pagos-completados').textContent = pagosCompletados;
-            document.getElementById('informes-generados').textContent = informesGenerados;
-            document.getElementById('ingresos').textContent = `$${ingresos.toLocaleString('es-CL')}`;
+                const totalPedidos = pedidos.length;
+                const pagosCompletados = pedidos.filter(p => p.estado === 'pagado').length;
+                const informesGenerados = pedidos.filter(p => p.estado === 'completado').length;
+                const ingresos = pedidos
+                    .filter(p => p.estado === 'pagado')
+                    .reduce((sum, p) => sum + PRECIOS[p.tipo], 0);
 
-            // Últimos 5 pedidos
-            const ultimos = pedidos.slice(-5).reverse();
-            const tbody = document.getElementById('dashboard-table');
+                document.getElementById('total-pedidos').textContent = totalPedidos;
+                document.getElementById('pagos-completados').textContent = pagosCompletados;
+                document.getElementById('informes-generados').textContent = informesGenerados;
+                document.getElementById('ingresos').textContent = `$${ingresos.toLocaleString('es-CL')}`;
 
-            if (ultimos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No hay pedidos aún</p></td></tr>';
-            } else {
-                tbody.innerHTML = ultimos.map(p => `
-                    <tr>
-                        <td>${p.nombre}</td>
-                        <td>${TIPOS_LABEL[p.tipo]}</td>
-                        <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
-                        <td>$${p.monto.toLocaleString('es-CL')}</td>
-                        <td>${p.fecha_creacion}</td>
-                    </tr>
-                `).join('');
+                // Últimos 5 pedidos
+                const ultimos = pedidos.slice(-5).reverse();
+                const tbody = document.getElementById('dashboard-table');
+
+                if (ultimos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No hay pedidos aún</p></td></tr>';
+                } else {
+                    tbody.innerHTML = ultimos.map(p => `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>${TIPOS_LABEL[p.tipo]}</td>
+                            <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
+                            <td>$${PRECIOS[p.tipo].toLocaleString('es-CL')}</td>
+                            <td>${new Date(p.fecha_creacion).toLocaleString('es-CL')}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error actualizando dashboard:', err);
             }
         }
 
         // Actualizar historial
-        function actualizarHistorial() {
-            const pedidos = JSON.parse(localStorage.getItem('pedidos') || '[]');
-            const tbody = document.getElementById('historial-table');
+        async function actualizarHistorial() {
+            try {
+                const response = await fetch('/api/pedidos');
+                if (!response.ok) throw new Error('Error obteniendo pedidos');
 
-            if (pedidos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No hay pedidos registrados</p></td></tr>';
-            } else {
-                tbody.innerHTML = pedidos.map(p => `
-                    <tr>
-                        <td>${p.nombre}</td>
-                        <td>${p.email}</td>
-                        <td>${TIPOS_LABEL[p.tipo]}</td>
-                        <td>${p.objetivo}</td>
-                        <td>$${p.monto.toLocaleString('es-CL')}</td>
-                        <td>
-                            ${p.link_flow ?
-                                `<a href="${p.link_flow}" target="_blank" style="color: #667eea; text-decoration: underline; font-size: 12px;">Abrir link</a>`
-                                : '<span style="color: #999;">Sin link</span>'
-                            }
-                        </td>
-                        <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
-                        <td>${p.fecha_creacion}</td>
-                    </tr>
-                `).join('');
+                const result = await response.json();
+                const pedidos = result.pedidos || [];
+                const tbody = document.getElementById('historial-table');
+
+                if (pedidos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No hay pedidos registrados</p></td></tr>';
+                } else {
+                    tbody.innerHTML = pedidos.map(p => `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>${p.email}</td>
+                            <td>${TIPOS_LABEL[p.tipo]}</td>
+                            <td>${p.objetivo}</td>
+                            <td>$${PRECIOS[p.tipo].toLocaleString('es-CL')}</td>
+                            <td>
+                                ${p.link_flow ?
+                                    `<a href="${p.link_flow}" target="_blank" style="color: #667eea; text-decoration: underline; font-size: 12px;">Abrir link</a>`
+                                    : '<span style="color: #999;">Sin link</span>'
+                                }
+                            </td>
+                            <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
+                            <td>${new Date(p.fecha_creacion).toLocaleString('es-CL')}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error actualizando historial:', err);
             }
         }
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
             actualizarDashboard();
+            // Actualizar automáticamente cada 10 segundos
+            setInterval(() => {
+                const activeTab = document.querySelector('.tab-content.active').id;
+                if (activeTab === 'dashboard') actualizarDashboard();
+                if (activeTab === 'historial') actualizarHistorial();
+            }, 10000);
         });
     </script>
 </body>
