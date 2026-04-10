@@ -10,6 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pipeline import run_pipeline
 from modules.pedidos_manager import crear_pedido, obtener_pedido, actualizar_pedido, obtener_todos
+from modules.mailer import notify_new_order
 
 load_dotenv()
 app = FastAPI(title="Informes IA", version="1.0.0")
@@ -91,11 +92,21 @@ async def crear_pedido_api(
     objetivo: str,
     email: str,
     nombre: str,
-    datos_extra: str = ""
+    datos_extra: str = "",
+    background_tasks: BackgroundTasks = None
 ):
     """API para crear un pedido desde el dashboard"""
     try:
         pedido = crear_pedido(tipo, objetivo, email, nombre, datos_extra)
+
+        # Enviar notificación al dueño
+        if background_tasks:
+            background_tasks.add_task(notify_new_order, email, nombre, tipo, objetivo, datos_extra)
+        else:
+            # Si no hay background_tasks disponible, intentar de forma sincrónica
+            import asyncio
+            asyncio.create_task(notify_new_order(email, nombre, tipo, objetivo, datos_extra))
+
         return JSONResponse({
             "ok": True,
             "pedido": pedido
@@ -124,6 +135,48 @@ async def actualizar_link_pedido(email: str, link_flow: str):
         return JSONResponse({"ok": True})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=400)
+
+@app.post("/api/confirmar-pago")
+async def confirmar_pago(request: Request, background_tasks: BackgroundTasks):
+    """Confirma un pago manual y dispara la generación del informe"""
+    try:
+        data = await request.json()
+        pedido_id = data.get("pedido_id")
+        email = data.get("email")
+        nombre = data.get("nombre")
+        tipo = data.get("tipo")
+        objetivo = data.get("objetivo")
+
+        if not all([pedido_id, email, nombre, tipo, objetivo]):
+            return JSONResponse({"error": "Faltan datos"}, status_code=400)
+
+        # Obtener el pedido
+        pedido_guardado = obtener_pedido(email)
+        if not pedido_guardado:
+            return JSONResponse({"error": "Pedido no encontrado"}, status_code=404)
+
+        # Actualizar estado
+        actualizar_pedido(email, "pagado")
+        print(f"✅ Pago confirmado manualmente: {email}")
+
+        # Preparar datos para el pipeline
+        pedido = {
+            "email": pedido_guardado["email"],
+            "nombre": pedido_guardado["nombre"],
+            "tipo": pedido_guardado["tipo"],
+            "objetivo": pedido_guardado["objetivo"],
+            "datos_extra": pedido_guardado["datos_extra"],
+            "instagram_sender_id": pedido_guardado.get("instagram_sender_id"),
+        }
+
+        # Generar informe en background
+        background_tasks.add_task(run_pipeline, pedido)
+        print(f"📊 Iniciando generación de informe para {email}...")
+
+        return JSONResponse({"ok": True, "mensaje": "Generando informe..."})
+    except Exception as e:
+        print(f"Error en confirmar_pago: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 if __name__ == "__main__":
     import uvicorn

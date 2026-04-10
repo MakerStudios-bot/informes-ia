@@ -294,13 +294,14 @@
                             <th>Cliente</th>
                             <th>Tipo de Informe</th>
                             <th>Estado</th>
-                            <th>Monto</th>
+                            <th>Precio</th>
                             <th>Fecha</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody id="dashboard-table">
                         <tr>
-                            <td colspan="5" class="empty-state">
+                            <td colspan="6" class="empty-state">
                                 <p>No hay pedidos aún</p>
                                 <p style="font-size: 12px;">Los pedidos aparecerán aquí cuando se creen links de pago</p>
                             </td>
@@ -472,6 +473,37 @@
             if (tabName === 'historial') actualizarHistorial();
         }
 
+        // Confirmar pago y disparar generación de informe
+        async function confirmarPago(pedidoId, email, nombre, tipo, objetivo) {
+            if (!confirm('¿Confirmar pago y generar informe?')) return;
+
+            try {
+                const response = await fetch('/api/confirmar-pago', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pedido_id: pedidoId,
+                        email: email,
+                        nombre: nombre,
+                        tipo: tipo,
+                        objetivo: objetivo
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Pago confirmado. Se está generando el informe...');
+                    actualizarDashboard();
+                    setTimeout(actualizarDashboard, 3000); // Actualizar en 3s
+                } else {
+                    alert('❌ Error: ' + (data.error || 'No se pudo procesar'));
+                }
+            } catch (err) {
+                alert('❌ Error de conexión: ' + err.message);
+            }
+        }
+
         // Crear pedido
         async function crearLink(e) {
             e.preventDefault();
@@ -583,17 +615,23 @@
                 const tbody = document.getElementById('dashboard-table');
 
                 if (ultimos.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No hay pedidos aún</p></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>No hay pedidos aún</p></td></tr>';
                 } else {
-                    tbody.innerHTML = ultimos.map(p => `
-                        <tr>
-                            <td>${p.nombre}</td>
-                            <td>${TIPOS_LABEL[p.tipo]}</td>
-                            <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
-                            <td>$${PRECIOS[p.tipo].toLocaleString('es-CL')}</td>
-                            <td>${new Date(p.fecha_creacion).toLocaleString('es-CL')}</td>
-                        </tr>
-                    `).join('');
+                    tbody.innerHTML = ultimos.map(p => {
+                        const btnAccion = p.estado === 'pendiente' ?
+                            `<button class="btn-confirmar" onclick="confirmarPago('${p.id}', '${p.email}', '${p.nombre}', '${p.tipo}', '${p.objetivo}')" style="background: #51cf66; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">✓ Confirmar Pago</button>`
+                            : '<span style="color: #999;">-</span>';
+                        return `
+                            <tr>
+                                <td>${p.nombre}</td>
+                                <td>${TIPOS_LABEL[p.tipo]}</td>
+                                <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
+                                <td>$${PRECIOS[p.tipo].toLocaleString('es-CL')}</td>
+                                <td>${new Date(p.fecha_creacion).toLocaleString('es-CL')}</td>
+                                <td>${btnAccion}</td>
+                            </tr>
+                        `;
+                    }).join('');
                 }
             } catch (err) {
                 console.error('Error actualizando dashboard:', err);
