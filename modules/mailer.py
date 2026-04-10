@@ -2,7 +2,7 @@ import os
 import base64
 from pathlib import Path
 from dotenv import load_dotenv
-import requests
+import httpx
 
 load_dotenv()
 
@@ -80,7 +80,7 @@ async def send_report(email: str, nombre: str, tipo_label: str, objetivo: str, p
         </html>
         """
 
-        # Enviar con Resend
+        # Enviar con Resend usando httpx (async)
         headers = {
             "Authorization": f"Bearer {RESEND_API_KEY}",
             "Content-Type": "application/json"
@@ -100,7 +100,8 @@ async def send_report(email: str, nombre: str, tipo_label: str, objetivo: str, p
             ]
         }
 
-        response = requests.post(RESEND_API_URL, json=payload, headers=headers, timeout=10)
+        async with httpx.AsyncClient() as client:
+            response = await client.post(RESEND_API_URL, json=payload, headers=headers, timeout=10)
 
         if response.status_code == 200:
             print(f"  ✅ Email enviado a {email}")
