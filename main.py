@@ -2,7 +2,7 @@
 Informes IA — Servidor principal
 """
 import os, hmac, hashlib
-from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
+from fastapi import FastAPI, Request, HTTPException, BackgroundTasks, Form
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import glob
@@ -88,11 +88,11 @@ async def get_pdf(filename: str):
 
 @app.post("/api/pedidos")
 async def crear_pedido_api(
-    tipo: str,
-    objetivo: str,
-    email: str,
-    nombre: str,
-    datos_extra: str = "",
+    tipo: str = Form(...),
+    objetivo: str = Form(...),
+    email: str = Form(...),
+    nombre: str = Form(...),
+    datos_extra: str = Form(""),
     background_tasks: BackgroundTasks = None
 ):
     """API para crear un pedido desde el dashboard"""
