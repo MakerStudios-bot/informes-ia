@@ -15,6 +15,7 @@ from modules.mailer import notify_new_order
 load_dotenv()
 app = FastAPI(title="Informes IA", version="1.0.0")
 FLOW_SECRET = os.getenv("FLOW_SECRET", "")
+# Redeploy - API key balance verified
 
 @app.post("/webhook/flow")
 async def webhook_flow(request: Request, background_tasks: BackgroundTasks):
