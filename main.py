@@ -3,7 +3,7 @@ Informes IA — Servidor principal
 """
 import os, hmac, hashlib
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks, Form
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import glob
 from pathlib import Path
@@ -235,7 +235,6 @@ async def test_page():
     </body>
     </html>
     """
-    from fastapi.responses import HTMLResponse
     return HTMLResponse(content=html)
 
 @app.get("/pdf/{filename}")
