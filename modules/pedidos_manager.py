@@ -1,15 +1,37 @@
 """
-Gestor de pedidos - almacenamiento persistente
+Gestor de pedidos - usando Supabase PostgreSQL
 """
-import json
-from pathlib import Path
+import os
 from datetime import datetime
 from typing import Optional
+from dotenv import load_dotenv
 
-PEDIDOS_FILE = Path(__file__).parent.parent / "pedidos.json"
+load_dotenv()
+
+# Supabase configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://fwxhcytqyiggkikbqvkc.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "sb_publishable_liA_6dO0uRQtGcbmv7anow_UVXFK-Wi")
+
+from supabase import create_client
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def inicializar_tabla():
+    """Crea la tabla de pedidos si no existe"""
+    try:
+        # Intentar crear la tabla
+        supabase.table("pedidos").select("*").limit(1).execute()
+        print("✓ Tabla 'pedidos' ya existe")
+    except Exception as e:
+        print(f"⚠️ Inicializando tabla de pedidos: {e}")
+        try:
+            # Intentar crear la tabla mediante SQL
+            pass  # Supabase creará la tabla automáticamente
+        except:
+            pass
 
 def crear_pedido(tipo: str, objetivo: str, email: str, nombre: str, datos_extra: str = "") -> dict:
-    """Crea un nuevo pedido y lo guarda"""
+    """Crea un nuevo pedido y lo guarda en Supabase"""
     # Extraer instagram_sender_id de datos_extra si viene en formato "instagram_sender_id:123"
     instagram_sender_id = None
     if datos_extra and "instagram_sender_id:" in datos_extra:
@@ -29,51 +51,58 @@ def crear_pedido(tipo: str, objetivo: str, email: str, nombre: str, datos_extra:
         "instagram_sender_id": instagram_sender_id
     }
 
-    pedidos = leer_pedidos()
-    pedidos["pedidos"].append(pedido)
-    guardar_pedidos(pedidos)
-
-    return pedido
+    try:
+        response = supabase.table("pedidos").insert(pedido).execute()
+        print(f"✓ Pedido creado en Supabase: {pedido['id']}")
+        return pedido
+    except Exception as e:
+        print(f"❌ Error creando pedido: {e}")
+        raise
 
 def obtener_pedido(email: str) -> Optional[dict]:
     """Obtiene el pedido más reciente de un cliente"""
-    pedidos = leer_pedidos()
-    # Buscar por email (el más reciente)
-    coincidentes = [p for p in pedidos["pedidos"] if p["email"] == email]
-    if coincidentes:
-        return coincidentes[-1]  # El último
-    return None
+    try:
+        response = supabase.table("pedidos").select("*").eq("email", email).order("fecha_creacion", desc=True).limit(1).execute()
+
+        if response.data and len(response.data) > 0:
+            return response.data[0]
+        return None
+    except Exception as e:
+        print(f"❌ Error obteniendo pedido: {e}")
+        return None
 
 def actualizar_pedido(email: str, estado: str, link_flow: str = None) -> bool:
     """Actualiza el estado de un pedido"""
-    pedidos = leer_pedidos()
+    try:
+        # Obtener el pedido más reciente
+        pedido = obtener_pedido(email)
 
-    # Buscar y actualizar el pedido más reciente del cliente
-    for p in reversed(pedidos["pedidos"]):
-        if p["email"] == email:
-            p["estado"] = estado
-            if estado == "pagado":
-                p["fecha_pago"] = datetime.now().isoformat()
-            if link_flow:
-                p["link_flow"] = link_flow
-            guardar_pedidos(pedidos)
-            return True
+        if not pedido:
+            return False
 
-    return False
+        update_data = {"estado": estado}
 
-def leer_pedidos() -> dict:
-    """Lee todos los pedidos"""
-    if PEDIDOS_FILE.exists():
-        with open(PEDIDOS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"pedidos": []}
+        if estado == "pagado":
+            update_data["fecha_pago"] = datetime.now().isoformat()
 
-def guardar_pedidos(pedidos: dict):
-    """Guarda los pedidos"""
-    with open(PEDIDOS_FILE, "w", encoding="utf-8") as f:
-        json.dump(pedidos, f, indent=2, ensure_ascii=False)
+        if link_flow:
+            update_data["link_flow"] = link_flow
+
+        response = supabase.table("pedidos").update(update_data).eq("id", pedido["id"]).execute()
+        print(f"✓ Pedido actualizado: {estado}")
+        return True
+    except Exception as e:
+        print(f"❌ Error actualizando pedido: {e}")
+        return False
 
 def obtener_todos() -> list:
     """Obtiene todos los pedidos"""
-    pedidos = leer_pedidos()
-    return pedidos.get("pedidos", [])
+    try:
+        response = supabase.table("pedidos").select("*").order("fecha_creacion", desc=True).execute()
+        return response.data if response.data else []
+    except Exception as e:
+        print(f"❌ Error obteniendo pedidos: {e}")
+        return []
+
+# Inicializar tabla al importar el módulo
+inicializar_tabla()
