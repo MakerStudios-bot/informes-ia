@@ -9,7 +9,7 @@ load_dotenv()
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 RESEND_API_URL = "https://api.resend.com/emails"
 FROM_EMAIL = "onboarding@resend.dev"
-OWNER_EMAIL = os.getenv("OWNER_EMAIL", "contacto@neurox.agency")
+OWNER_EMAIL = os.getenv("OWNER_EMAIL", "jogamerojas@gmail.com")
 
 async def send_report(email: str, nombre: str, tipo_label: str, objetivo: str, pdf_path: str):
     """
