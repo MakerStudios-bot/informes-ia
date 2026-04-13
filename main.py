@@ -69,7 +69,15 @@ async def landing():
 
 @app.get("/dashboard")
 async def dashboard():
-    """Sirve el dashboard HTML"""
+    """Sirve el dashboard simple"""
+    dashboard_path = Path(__file__).parent / "dashboard-simple.html"
+    if dashboard_path.exists():
+        return FileResponse(dashboard_path)
+    return JSONResponse({"error": "Dashboard not found"}, status_code=404)
+
+@app.get("/dashboard-old")
+async def dashboard_old():
+    """Sirve el dashboard antiguo"""
     dashboard_path = Path(__file__).parent / "dashboard.html"
     if dashboard_path.exists():
         return FileResponse(dashboard_path)
