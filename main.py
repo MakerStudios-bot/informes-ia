@@ -67,13 +67,93 @@ async def landing():
         return FileResponse(landing_path)
     return JSONResponse({"error": "Landing page not found"}, status_code=404)
 
-@app.get("/dashboard")
+@app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard():
-    """Sirve el dashboard simple"""
-    dashboard_path = Path(__file__).parent / "dashboard-simple.html"
-    if dashboard_path.exists():
-        return FileResponse(dashboard_path)
-    return JSONResponse({"error": "Dashboard not found"}, status_code=404)
+    """Dashboard simple con pedidos"""
+    html = """<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Informes IA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
+        h1 { font-size: 28px; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 32px; font-weight: bold; color: #667eea; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+        table { width: 100%; background: white; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th { background: #f5f5f5; padding: 15px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #fafafa; }
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-pendiente { background: #fff3cd; color: #856404; }
+        .badge-pagado { background: #d4edda; color: #155724; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .error { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Dashboard</h1>
+            <p>Informes IA - Gestión de pedidos</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="total">0</div>
+                <div class="stat-label">Total Pedidos</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="pagados">0</div>
+                <div class="stat-label">Pagados</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="pendientes">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 20px;">Pedidos</h2>
+        <div id="tabla">
+            <div class="loading">Cargando...</div>
+        </div>
+    </div>
+
+    <script>
+        async function cargar() {
+            try {
+                const res = await fetch('/api/pedidos');
+                const data = await res.json();
+                const pedidos = data.pedidos || [];
+
+                document.getElementById('total').innerText = pedidos.length;
+                document.getElementById('pagados').innerText = pedidos.filter(p => p.estado === 'pagado').length;
+                document.getElementById('pendientes').innerText = pedidos.filter(p => p.estado === 'pendiente').length;
+
+                let html = '<table><thead><tr><th>Nombre</th><th>Email</th><th>Tipo</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>';
+                pedidos.forEach(p => {
+                    const badge = p.estado === 'pagado' ? 'badge-pagado' : 'badge-pendiente';
+                    const fecha = new Date(p.fecha_creacion).toLocaleDateString('es-CL');
+                    html += '<tr><td>' + p.nombre + '</td><td>' + p.email + '</td><td>' + p.tipo + '</td><td><span class="badge ' + badge + '">' + p.estado + '</span></td><td>' + fecha + '</td></tr>';
+                });
+                html += '</tbody></table>';
+                document.getElementById('tabla').innerHTML = html;
+            } catch (e) {
+                document.getElementById('tabla').innerHTML = '<p class="error">Error: ' + e + '</p>';
+            }
+        }
+        cargar();
+        setInterval(cargar, 10000);
+    </script>
+</body>
+</html>"""
+    return html
 
 @app.get("/dashboard-old")
 async def dashboard_old():
