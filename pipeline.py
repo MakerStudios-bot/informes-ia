@@ -46,7 +46,7 @@ async def notify_neurox_bot(instagram_sender_id: str, pdf_filename: str, objetiv
 async def run_pipeline(pedido: dict):
     tipo_label = TIPOS.get(pedido["tipo"], pedido["tipo"])
     informe_id = f"{pedido['tipo']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    print(f"[{informe_id}] Iniciando pipeline... (API balance OK)")
+    print(f"[{informe_id}] Iniciando pipeline... (API key updated with Pro plan)")
     datos = await research(pedido["tipo"], pedido["objetivo"], pedido.get("datos_extra",""))
     html  = await write_report(pedido["tipo"], tipo_label, pedido["objetivo"], datos, pedido.get("nombre",""))
     pdf   = await generate_pdf(html, informe_id)
