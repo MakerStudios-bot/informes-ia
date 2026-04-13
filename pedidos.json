@@ -7,7 +7,7 @@
       "email": "test@example.com",
       "nombre": "Cliente Test",
       "datos_extra": "Prueba desde script",
-      "estado": "pagado",
+      "estado": "pendiente",
       "fecha_creacion": "2026-04-10T15:13:53.648782",
       "fecha_pago": "2026-04-10T15:13:53.653425",
       "link_flow": null
