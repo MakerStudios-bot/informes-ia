@@ -651,6 +651,7 @@
         // Actualizar historial
         async function actualizarHistorial() {
             try {
+                console.log('[DEBUG] Iniciando actualizarHistorial()');
                 const response = await fetch('https://web-production-e421.up.railway.app/api/pedidos');
                 if (!response.ok) throw new Error('Error obteniendo pedidos');
 
@@ -658,29 +659,39 @@
                 const pedidos = result.pedidos || [];
                 const tbody = document.getElementById('historial-table');
 
+                console.log('[DEBUG] Pedidos obtenidos:', pedidos.length);
+                console.log('[DEBUG] Elemento tbody encontrado:', !!tbody);
+
                 if (pedidos.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No hay pedidos registrados</p></td></tr>';
                 } else {
-                    tbody.innerHTML = pedidos.map(p => `
-                        <tr>
-                            <td>${p.nombre}</td>
-                            <td>${p.email}</td>
-                            <td>${TIPOS_LABEL[p.tipo]}</td>
-                            <td>${p.objetivo}</td>
-                            <td>$${PRECIOS[p.tipo].toLocaleString('es-CL')}</td>
-                            <td>
-                                ${p.link_flow ?
-                                    `<a href="${p.link_flow}" target="_blank" style="color: #667eea; text-decoration: underline; font-size: 12px;">Abrir link</a>`
-                                    : '<span style="color: #999;">Sin link</span>'
-                                }
-                            </td>
-                            <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
-                            <td>${new Date(p.fecha_creacion).toLocaleString('es-CL')}</td>
-                        </tr>
-                    `).join('');
+                    const filas = pedidos.map(p => {
+                        const tipoLabel = TIPOS_LABEL[p.tipo] || p.tipo;
+                        const precio = PRECIOS[p.tipo] || 0;
+                        console.log(`[DEBUG] Procesando pedido: ${p.email}, tipo: ${p.tipo}, tipoLabel: ${tipoLabel}, precio: ${precio}`);
+                        return `
+                            <tr>
+                                <td>${p.nombre}</td>
+                                <td>${p.email}</td>
+                                <td>${tipoLabel}</td>
+                                <td>${p.objetivo}</td>
+                                <td>$${precio.toLocaleString('es-CL')}</td>
+                                <td>
+                                    ${p.link_flow ?
+                                        `<a href="${p.link_flow}" target="_blank" style="color: #667eea; text-decoration: underline; font-size: 12px;">Abrir link</a>`
+                                        : '<span style="color: #999;">Sin link</span>'
+                                    }
+                                </td>
+                                <td><span class="badge badge-${p.estado === 'completado' ? 'success' : p.estado === 'pagado' ? 'pending' : 'pending'}">${p.estado.toUpperCase()}</span></td>
+                                <td>${new Date(p.fecha_creacion).toLocaleString('es-CL')}</td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = filas.join('');
+                    console.log('[DEBUG] Tabla renderizada con', filas.length, 'filas');
                 }
             } catch (err) {
-                console.error('Error actualizando historial:', err);
+                console.error('[ERROR] Error actualizando historial:', err);
             }
         }
 
