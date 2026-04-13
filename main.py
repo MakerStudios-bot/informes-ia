@@ -75,7 +75,7 @@ async def dashboard():
         return FileResponse(dashboard_path)
     return JSONResponse({"error": "Dashboard not found"}, status_code=404)
 
-@app.get("/test")
+@app.get("/test", response_class=HTMLResponse)
 async def test_page():
     """Página de test para crear y listar pedidos"""
     html = """
